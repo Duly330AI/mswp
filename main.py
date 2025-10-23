@@ -73,15 +73,27 @@ class DifficultyMenu:
         else:
             self.screen.fill((192, 192, 192))
         
-        # title
+        # title with background box
         font_title = pygame.font.SysFont(None, 32, bold=False)
         title = font_title.render("Duly's Minesweeper", True, (0, 0, 0))
-        self.screen.blit(title, (self.width//2 - title.get_width()//2, 15))
+        title_bg = pygame.Surface((title.get_width() + 20, title.get_height() + 10))
+        title_bg.fill((255, 255, 255))
+        title_bg.set_alpha(200)
+        title_x = self.width//2 - title_bg.get_width()//2
+        title_y = 10
+        self.screen.blit(title_bg, (title_x, title_y))
+        self.screen.blit(title, (title_x + 10, title_y + 5))
         
-        # subtitle
+        # subtitle with background box
         font_subtitle = pygame.font.SysFont(None, 18)
         subtitle = font_subtitle.render("Schwierigkeitsstufe wählen", True, (50, 50, 50))
-        self.screen.blit(subtitle, (self.width//2 - subtitle.get_width()//2, 50))
+        subtitle_bg = pygame.Surface((subtitle.get_width() + 20, subtitle.get_height() + 10))
+        subtitle_bg.fill((255, 255, 255))
+        subtitle_bg.set_alpha(200)
+        subtitle_x = self.width//2 - subtitle_bg.get_width()//2
+        subtitle_y = 45
+        self.screen.blit(subtitle_bg, (subtitle_x, subtitle_y))
+        self.screen.blit(subtitle, (subtitle_x + 10, subtitle_y + 5))
         
         # button font
         font_btn = pygame.font.SysFont(None, 20)
