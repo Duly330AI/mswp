@@ -55,6 +55,7 @@ class Game:
         self.board = Board(self.cols, self.rows, self.mines)
         self.running = True
         self.game_over = False
+        # use simple string states for smiley drawing: 'normal', 'lost', 'won'
         self.smiley_state = 'normal'
         self.timer_start = None
         self.elapsed_seconds = 0
@@ -89,11 +90,13 @@ class Game:
                             cell.exploded = True
                             self.board.reveal_all_mines()
                             self.game_over = True
+                            # set state for lost (will affect drawn smiley)
                             self.smiley_state = 'lost'
                         else:
                             # check for win after reveal
                             if self.board.check_win():
                                 self.game_over = True
+                                # set state for won (will affect drawn smiley)
                                 self.smiley_state = 'won'
                                 # auto-flag remaining mines for clarity
                                 for yy in range(self.board.height):
@@ -121,17 +124,66 @@ class Game:
         if self.timer_start is not None and not self.game_over:
             self.elapsed_seconds = int((pygame.time.get_ticks() - self.timer_start) / 1000)
 
-        # choose smiley glyph based on game state
-        if self.smiley_state == 'normal':
-            smiley_text = ':)'
-        elif self.smiley_state == 'lost':
-            smiley_text = '\U0001F635'
-        elif self.smiley_state == 'won':
-            smiley_text = '\U0001F60E'
+        # draw smiley manually inside self.smiley_rect
+        sx, sy, sw, sh = self.smiley_rect
+        cx = sx + sw // 2
+        cy = sy + sh // 2
+        # make the smiley smaller so it doesn't overlap header text
+        radius = int(min(sw, sh) * 0.28)
+
+        # determine which state to display. If mines aren't placed yet show 'normal'.
+        exploded_exists = any(
+            self.board.grid[yy][xx].exploded
+            for yy in range(self.board.height)
+            for xx in range(self.board.width)
+        )
+        if not self.board.mines_placed:
+            display_state = 'normal'
+        elif exploded_exists:
+            display_state = 'lost'
         else:
-            smiley_text = ':)'
-        smiley = font.render(smiley_text, True, (255,255,0))
-        self.screen.blit(smiley, (self.width//2 - 10, 8))
+            display_state = self.smiley_state
+
+        # face (yellow circle)
+        pygame.draw.circle(self.screen, (255, 215, 0), (cx, cy), radius)
+
+        # eyes positions
+        eye_dx = max(1, radius // 2)
+        eye_dy = -max(1, radius // 6)
+        eye_r = max(2, radius // 6)
+        left_eye = (cx - eye_dx, cy + eye_dy)
+        right_eye = (cx + eye_dx, cy + eye_dy)
+
+        # draw eyes or sunglasses for 'won'
+        if display_state == 'won':
+            rect_w = max(4, eye_r * 2)
+            rect_h = max(2, eye_r)
+            pygame.draw.rect(self.screen, (0,0,0), (left_eye[0]-rect_w//2, left_eye[1]-rect_h//2, rect_w, rect_h))
+            pygame.draw.rect(self.screen, (0,0,0), (right_eye[0]-rect_w//2, right_eye[1]-rect_h//2, rect_w, rect_h))
+        else:
+            pygame.draw.circle(self.screen, (0,0,0), left_eye, eye_r)
+            pygame.draw.circle(self.screen, (0,0,0), right_eye, eye_r)
+
+        # mouth geometry
+        mouth_w = max(6, radius)
+        mouth_h = max(2, radius // 4)
+        mouth_y = cy + radius // 3
+
+        # Draw mouth: normal -> smile, lost -> frown, won -> straight line
+        if display_state == 'normal':
+            for i in range(-mouth_w//2, mouth_w//2):
+                x1 = cx + i
+                rel = (i / (mouth_w/2))
+                y_off = int((1 - rel*rel) * mouth_h)
+                pygame.draw.line(self.screen, (0,0,0), (x1, mouth_y + y_off), (x1, mouth_y + y_off))
+        elif display_state == 'lost':
+            for i in range(-mouth_w//2, mouth_w//2):
+                x1 = cx + i
+                rel = (i / (mouth_w/2))
+                y_off = int(- (1 - rel*rel) * mouth_h)
+                pygame.draw.line(self.screen, (0,0,0), (x1, mouth_y + y_off), (x1, mouth_y + y_off))
+        else:
+            pygame.draw.line(self.screen, (0,0,0), (cx - mouth_w//2, mouth_y), (cx + mouth_w//2, mouth_y), 2)
 
         timer_txt = font.render(f"Time: {self.elapsed_seconds}", True, (255,255,255))
         self.screen.blit(timer_txt, (self.width - timer_txt.get_width() - 8, 8))
@@ -145,7 +197,20 @@ class Game:
                 pygame.draw.rect(self.screen, color, rect)
                 pygame.draw.rect(self.screen, (0,0,0), rect, 1)
                 if cell.flagged and not cell.revealed:
-                    pygame.draw.rect(self.screen, (200,0,0), rect.inflate(-6, -6))
+                    # draw a flag: vertical pole and triangular flag
+                    pole_x = rect.centerx - 2
+                    pole_y = rect.top + 4
+                    pole_h = rect.height - 8
+                    pygame.draw.line(self.screen, (0, 0, 0), (pole_x, pole_y), (pole_x, pole_y + pole_h), 2)
+                    # flag triangle (red)
+                    flag_w = 8
+                    flag_h = 6
+                    flag_points = [
+                        (pole_x + 2, pole_y),
+                        (pole_x + 2 + flag_w, pole_y + flag_h // 2),
+                        (pole_x + 2, pole_y + flag_h)
+                    ]
+                    pygame.draw.polygon(self.screen, (200, 0, 0), flag_points)
                 if cell.revealed and cell.mine:
                     if cell.exploded:
                         pygame.draw.rect(self.screen, (200,50,50), rect)
