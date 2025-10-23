@@ -1,14 +1,105 @@
 """Main game module.
 
 Contains the Game class which encapsulates Minesweeper's state and
-behavior (event handling, rendering and main loop). The `run` function is
-a small wrapper around `Game.run()` for script entry.
+behavior (event handling, rendering and main loop). The DifficultyMenu class
+displays a UI for selecting game difficulty before starting. The `run` function
+is a small wrapper around `Game.run()` for script entry.
 """
 
 import pygame
 from config import CELL_SIZE, HEADER_HEIGHT, FPS
 from config import DIFFICULTIES
 from board import Board
+
+
+class DifficultyMenu:
+    """Displays a menu to select game difficulty before starting the game.
+    
+    Public methods:
+      - run(): display the menu and return selected difficulty
+    """
+    
+    def __init__(self):
+        pygame.init()
+        # menu window size
+        self.width = 400
+        self.height = 300
+        self.screen = pygame.display.set_mode((self.width, self.height))
+        pygame.display.set_caption('Minesweeper - Select Difficulty')
+        self.clock = pygame.time.Clock()
+        self.running = True
+        self.selected_difficulty = None
+        
+        # button rectangles
+        button_width = 150
+        button_height = 50
+        button_y_start = 120
+        button_spacing = 70
+        
+        self.beginner_btn = pygame.Rect(self.width//2 - button_width//2, button_y_start, button_width, button_height)
+        self.intermediate_btn = pygame.Rect(self.width//2 - button_width//2, button_y_start + button_spacing, button_width, button_height)
+        self.expert_btn = pygame.Rect(self.width//2 - button_width//2, button_y_start + button_spacing*2, button_width, button_height)
+    
+    def handle_events(self):
+        """Handle menu events (mouse clicks, window close)."""
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mx, my = event.pos
+                if self.beginner_btn.collidepoint(mx, my):
+                    self.selected_difficulty = 'beginner'
+                    self.running = False
+                elif self.intermediate_btn.collidepoint(mx, my):
+                    self.selected_difficulty = 'intermediate'
+                    self.running = False
+                elif self.expert_btn.collidepoint(mx, my):
+                    self.selected_difficulty = 'expert'
+                    self.running = False
+    
+    def draw(self):
+        """Render the difficulty menu."""
+        self.screen.fill((192, 192, 192))
+        
+        # title
+        font_title = pygame.font.SysFont(None, 32, bold=True)
+        title = font_title.render('Select Difficulty', True, (0, 0, 0))
+        self.screen.blit(title, (self.width//2 - title.get_width()//2, 20))
+        
+        # button font
+        font_btn = pygame.font.SysFont(None, 20)
+        
+        # draw buttons
+        buttons = [
+            (self.beginner_btn, 'Beginner', (0, 150, 0)),
+            (self.intermediate_btn, 'Intermediate', (200, 150, 0)),
+            (self.expert_btn, 'Expert', (200, 0, 0))
+        ]
+        
+        for btn_rect, label, color in buttons:
+            # button background
+            pygame.draw.rect(self.screen, color, btn_rect)
+            # button border (3D effect)
+            pygame.draw.line(self.screen, (255, 255, 255), btn_rect.topleft, btn_rect.topright, 2)
+            pygame.draw.line(self.screen, (255, 255, 255), btn_rect.topleft, btn_rect.bottomleft, 2)
+            pygame.draw.line(self.screen, (128, 128, 128), btn_rect.bottomleft, btn_rect.bottomright, 2)
+            pygame.draw.line(self.screen, (128, 128, 128), btn_rect.topright, btn_rect.bottomright, 2)
+            # button text
+            text = font_btn.render(label, True, (255, 255, 255))
+            self.screen.blit(text, (btn_rect.x + btn_rect.width//2 - text.get_width()//2,
+                                    btn_rect.y + btn_rect.height//2 - text.get_height()//2))
+        
+        pygame.display.flip()
+    
+    def run(self):
+        """Run the menu loop and return selected difficulty."""
+        while self.running:
+            self.handle_events()
+            self.draw()
+            self.clock.tick(FPS)
+        
+        pygame.quit()
+        return self.selected_difficulty if self.selected_difficulty else 'beginner'
 
 
 class Game:
@@ -257,6 +348,14 @@ class Game:
 
 
 def run(difficulty='beginner'):
+    """Run the game with an optional difficulty.
+    
+    If difficulty is 'beginner' (default), show the difficulty menu first.
+    Otherwise, start the game directly with the specified difficulty.
+    """
+    if difficulty == 'beginner':
+        menu = DifficultyMenu()
+        difficulty = menu.run()
     Game(difficulty).run()
 
 
