@@ -30,6 +30,14 @@ class DifficultyMenu:
         self.running = True
         self.selected_difficulty = None
         
+        # load background image
+        self.background = None
+        try:
+            self.background = pygame.image.load('images/background.png')
+            self.background = pygame.transform.scale(self.background, (self.width, self.height))
+        except Exception as e:
+            print(f"Warning: Could not load background image: {e}")
+        
         # button rectangles
         button_width = 150
         button_height = 50
@@ -59,7 +67,11 @@ class DifficultyMenu:
     
     def draw(self):
         """Render the difficulty menu."""
-        self.screen.fill((192, 192, 192))
+        # display background or fallback to gray
+        if self.background:
+            self.screen.blit(self.background, (0, 0))
+        else:
+            self.screen.fill((192, 192, 192))
         
         # title
         font_title = pygame.font.SysFont(None, 32, bold=False)
