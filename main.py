@@ -23,9 +23,9 @@ class DifficultyMenu:
         pygame.init()
         # menu window size
         self.width = 400
-        self.height = 300
+        self.height = 400
         self.screen = pygame.display.set_mode((self.width, self.height))
-        pygame.display.set_caption('Minesweeper - Select Difficulty')
+        pygame.display.set_caption('Duly\'s Minesweeper - Select Difficulty')
         self.clock = pygame.time.Clock()
         self.running = True
         self.selected_difficulty = None
@@ -33,7 +33,7 @@ class DifficultyMenu:
         # button rectangles
         button_width = 150
         button_height = 50
-        button_y_start = 120
+        button_y_start = 140
         button_spacing = 70
         
         self.beginner_btn = pygame.Rect(self.width//2 - button_width//2, button_y_start, button_width, button_height)
@@ -62,8 +62,8 @@ class DifficultyMenu:
         self.screen.fill((192, 192, 192))
         
         # title
-        font_title = pygame.font.SysFont(None, 32, bold=True)
-        title = font_title.render('Select Difficulty', True, (0, 0, 0))
+        font_title = pygame.font.SysFont(None, 36, bold=True)
+        title = font_title.render("Duly's Minesweeper", True, (0, 0, 0))
         self.screen.blit(title, (self.width//2 - title.get_width()//2, 20))
         
         # button font
