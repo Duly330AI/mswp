@@ -7,12 +7,14 @@ A faithful recreation of the classic Windows Minesweeper game, built with Python
 ✨ **Complete Gameplay**
 - Classic Minesweeper rules: reveal cells, flag mines, win by revealing all safe cells
 - "First-click safe" guarantee: mines are never placed on your first click
-- Three difficulty levels: Beginner, Intermediate, Expert
+- Three difficulty levels: Beginner, Intermediate, Expert (selectable from menu)
 - Auto-flag remaining mines on victory
 - Real-time mine counter and timer
 
 🎨 **Authentic UI**
+- **Difficulty Selection Menu**: Graphical menu to choose game difficulty at startup
 - Windows 95-style 3D beveled header with inset effects
+- Grid-pattern background for visual depth
 - Manually-drawn yellow smiley face that changes expression:
   - 😊 Normal (happy smile)
   - 😞 Lost (sad frown)
@@ -20,12 +22,13 @@ A faithful recreation of the classic Windows Minesweeper game, built with Python
 - Clickable smiley to restart the game
 - Red mine count display (3-digit format)
 - Red timer display (3-digit format)
-- Proper flag markers (not just colored rectangles)
+- Proper flag markers (red flag graphics, not colored rectangles)
+- Text with semi-transparent white background for readability
 
 🎮 **Controls**
 - **Left-click**: Reveal a cell
 - **Right-click**: Place/remove flag
-- **Click Smiley**: Restart game
+- **Click Smiley**: Restart game (also available from menu on difficulty selection)
 
 ## Quick Start
 
@@ -57,14 +60,18 @@ python main.py
 
 ```
 .
-├── main.py              # Game class and main loop
-├── board.py             # Board generation, mine placement, reveal logic
-├── cell.py              # Cell state (covered, revealed, flagged, mine)
-├── config.py            # Configuration constants (sizes, colors, difficulties)
-├── requirements.txt     # Python dependencies (pygame)
-├── SPEC.md              # Game specification and rules
-├── dist/                # Standalone executable (Minesweeper.exe)
-└── README.md            # This file
+├── main.py                  # Game class, DifficultyMenu, and main loop
+├── board.py                 # Board generation, mine placement, reveal logic
+├── cell.py                  # Cell state (covered, revealed, flagged, mine)
+├── config.py                # Configuration constants (sizes, colors, difficulties)
+├── generate_background.py   # Script to generate grid background image
+├── requirements.txt         # Python dependencies (pygame)
+├── SPEC.md                  # Game specification and requirements
+├── README.md                # This file
+├── images/                  # Asset folder
+│   └── background.png       # Grid pattern background for menu
+└── dist/                    # Standalone executable
+    └── Minesweeper.exe      # Ready-to-run Windows executable
 ```
 
 ## Dependencies
@@ -96,13 +103,20 @@ Install via: `pip install -r requirements.txt`
 ### Run from Source
 ```powershell
 python main.py
+# Menu will appear to select difficulty
 ```
 
 ### Build Standalone EXE (requires PyInstaller)
 ```powershell
 pip install pyinstaller
-pyinstaller --onefile --windowed --name=Minesweeper main.py
+pyinstaller --onefile --windowed --add-data "images;images" --name=Minesweeper main.py
 # Output: dist/Minesweeper.exe
+```
+
+### Regenerate Background Image
+```powershell
+python generate_background.py
+# Creates images/background.png with grid pattern
 ```
 
 ### Code Quality
@@ -110,6 +124,7 @@ pyinstaller --onefile --windowed --name=Minesweeper main.py
 - Inline comments for complex logic
 - Game state kept explicit (normal → lost/won)
 - Follows PEP 8 style guidelines
+- Modular architecture for easy testing
 
 ## Testing
 
@@ -121,4 +136,11 @@ Public Domain / MIT License
 
 ## History
 
-**October 2025**: Complete implementation with Windows 95 UI styling, smiley face button, flag markers, and standalone executable.
+**October 2025 - Final Release**:
+- ✅ Complete Windows 95-style Minesweeper implementation
+- ✅ Graphical difficulty selection menu
+- ✅ Grid-pattern background with text isolation
+- ✅ Smiley face with three expressions (smile/frown/sunglasses)
+- ✅ Authentic flag markers and UI styling
+- ✅ Standalone Windows executable (no Python required)
+- ✅ Full source code with documentation
