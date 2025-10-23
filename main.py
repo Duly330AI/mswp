@@ -7,9 +7,20 @@ is a small wrapper around `Game.run()` for script entry.
 """
 
 import pygame
+import os
+import sys
 from config import CELL_SIZE, HEADER_HEIGHT, FPS
 from config import DIFFICULTIES
 from board import Board
+
+
+def get_resource_path(relative_path):
+    """Get path to resource, handling both development and PyInstaller bundled environments."""
+    try:
+        base_path = sys._MEIPASS
+    except AttributeError:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
 
 
 class DifficultyMenu:
@@ -33,10 +44,11 @@ class DifficultyMenu:
         # load background image
         self.background = None
         try:
-            self.background = pygame.image.load('images/background.png')
+            bg_path = get_resource_path('images/background.png')
+            self.background = pygame.image.load(bg_path)
             self.background = pygame.transform.scale(self.background, (self.width, self.height))
         except Exception as e:
-            print(f"Warning: Could not load background image: {e}")
+            print(f"Warning: Could not load background image from {bg_path}: {e}")
         
         # button rectangles
         button_width = 150
