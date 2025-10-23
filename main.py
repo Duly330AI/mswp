@@ -113,12 +113,27 @@ class Game:
         """Render the header and the grid to the screen."""
         # clear background
         self.screen.fill((200,200,200))
-        # header
-        pygame.draw.rect(self.screen, (100,100,100), (0,0,self.width,HEADER_HEIGHT))
-        font = pygame.font.SysFont(None, 28)
+        # header with 3D beveled effect
+        pygame.draw.rect(self.screen, (192, 192, 192), (0, 0, self.width, HEADER_HEIGHT))
+        # 3D top/left beveled edge (lighter)
+        pygame.draw.line(self.screen, (255, 255, 255), (0, 0), (self.width, 0), 2)
+        pygame.draw.line(self.screen, (255, 255, 255), (0, 0), (0, HEADER_HEIGHT), 2)
+        # 3D bottom/right beveled edge (darker)
+        pygame.draw.line(self.screen, (128, 128, 128), (self.width-1, 0), (self.width-1, HEADER_HEIGHT), 2)
+        pygame.draw.line(self.screen, (128, 128, 128), (0, HEADER_HEIGHT-1), (self.width, HEADER_HEIGHT-1), 2)
+
+        font = pygame.font.SysFont(None, 24)
         remaining = max(0, self.board.mines - self.board.flagged_count)
-        mines_txt = font.render(f"Mines: {remaining}", True, (255,0,0))
-        self.screen.blit(mines_txt, (8, 8))
+        
+        # Mines display with 3D inset effect
+        mines_display_rect = pygame.Rect(8, 8, 70, 24)
+        pygame.draw.rect(self.screen, (192, 192, 192), mines_display_rect)
+        pygame.draw.line(self.screen, (128, 128, 128), mines_display_rect.topleft, mines_display_rect.topright, 1)
+        pygame.draw.line(self.screen, (128, 128, 128), mines_display_rect.topleft, mines_display_rect.bottomleft, 1)
+        pygame.draw.line(self.screen, (255, 255, 255), mines_display_rect.bottomleft, mines_display_rect.bottomright, 1)
+        pygame.draw.line(self.screen, (255, 255, 255), mines_display_rect.topright, mines_display_rect.bottomright, 1)
+        mines_txt = font.render(f"{remaining:03d}", True, (255, 0, 0))
+        self.screen.blit(mines_txt, (mines_display_rect.x + 8, mines_display_rect.y + 4))
 
         # update timer
         if self.timer_start is not None and not self.game_over:
@@ -185,8 +200,15 @@ class Game:
         else:
             pygame.draw.line(self.screen, (0,0,0), (cx - mouth_w//2, mouth_y), (cx + mouth_w//2, mouth_y), 2)
 
-        timer_txt = font.render(f"Time: {self.elapsed_seconds}", True, (255,255,255))
-        self.screen.blit(timer_txt, (self.width - timer_txt.get_width() - 8, 8))
+        timer_txt = font.render(f"{self.elapsed_seconds:03d}", True, (255, 0, 0))
+        # Timer display with 3D inset effect
+        timer_display_rect = pygame.Rect(self.width - 78, 8, 70, 24)
+        pygame.draw.rect(self.screen, (192, 192, 192), timer_display_rect)
+        pygame.draw.line(self.screen, (128, 128, 128), timer_display_rect.topleft, timer_display_rect.topright, 1)
+        pygame.draw.line(self.screen, (128, 128, 128), timer_display_rect.topleft, timer_display_rect.bottomleft, 1)
+        pygame.draw.line(self.screen, (255, 255, 255), timer_display_rect.bottomleft, timer_display_rect.bottomright, 1)
+        pygame.draw.line(self.screen, (255, 255, 255), timer_display_rect.topright, timer_display_rect.bottomright, 1)
+        self.screen.blit(timer_txt, (timer_display_rect.x + 8, timer_display_rect.y + 4))
 
         # grid
         for y in range(self.board.height):
